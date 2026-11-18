@@ -9,6 +9,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   sync:
+    # Safety hold: legacy writer must stay stopped during read-only diagnosis.
+    if: ${{ false }}
     name: Sync
     runs-on: ubuntu-latest
     env:
