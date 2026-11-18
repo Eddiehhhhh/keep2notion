@@ -1,0 +1,29 @@
+name: Read-only sync diagnostic
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: readonly-sync-diagnostic
+  cancel-in-progress: false
+jobs:
+  inspect:
+    if: github.repository == 'Eddiehhhhh/keep2notion' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Offline safety tests
+        run: python3 -m unittest discover -s readonly_diagnostic -p 'test_*.py' -q
+      - name: Aggregate comparison only
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PAGE: ${{ secrets.NOTION_PAGE }}
+          NOTION_WORKOUT_DATABASE_ID: ${{ secrets.NOTION_WORKOUT_DATABASE_ID }}
+          KEEP_MOBILE: ${{ secrets.KEEP_MOBILE }}
+          KEEP_PASSWORD: ${{ secrets.KEEP_PASSWORD }}
+          COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
+        run: python3 readonly_diagnostic/runner.py
